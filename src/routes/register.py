@@ -1,4 +1,4 @@
-from flask import Blueprint, make_response, request, Response, json
+from flask import Blueprint, request, Response, json
 from werkzeug.security import generate_password_hash
 
 rc_register = Blueprint("register", __name__, url_prefix="/api")
@@ -25,6 +25,8 @@ def is_user_exist(username) -> bool:
     for itm in test_user_list:
         if itm["username"] == username:
             return True
+        else:
+            return False
 
 
 @rc_register.route("/register", methods=["POST"])
