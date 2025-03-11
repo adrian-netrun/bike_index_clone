@@ -86,19 +86,3 @@ class Comment(Base):
     user_profile_id: Mapped[int] = mapped_column(ForeignKey("UserProfile.id"))
     comment_content: Mapped[int] = mapped_column(String(500), nullable=False)
     post_id: Mapped[int] = mapped_column(ForeignKey("Post.id"))
-
-
-engine = create_engine(
-    "mariadb+pymysql://adrian-dev:hellodatabase@localhost/bikeindex2?charset=utf8mb4",
-    echo=True,
-)
-
-# Base.metadata.create_all(bind=engine)
-
-Session = sessionmaker(bind=engine)
-session = Session()
-
-user1 = User(username="adrian", hashed_password="password")
-
-session.add(user1)
-session.commit()
