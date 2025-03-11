@@ -3,7 +3,7 @@ from typing import List
 from typing import Optional
 from datetime import datetime
 from sqlalchemy import ForeignKey
-from sqlalchemy import String, DateTime
+from sqlalchemy import String, DateTime, Integer, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
@@ -22,7 +22,7 @@ class Base(DeclarativeBase):
     )
 
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at = mapped_column(DateTime(timezone=True), onupdate=func.utcnow())
 
     def __repr__(self):
         pass
@@ -31,11 +31,10 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "User"
 
-    username = mapped_column(String(300), nullable=False)
+    username = mapped_column(String(300), nullable=False, unique=True)
     hashed_password = mapped_column(String(10000), nullable=False)
-    user_profile: Mapped["UserProfile"] = relationship(
-        back_populates="UserProfile", uselist=False
-    )
+    user_profile: Mapped["UserProfile"] = relationship(uselist=False)
+    has_admin: Mapped["HasAdmin"] = relationship(uselist=False)
 
 
 class UserProfile(Base):
@@ -48,27 +47,58 @@ class UserProfile(Base):
     # this calls cannot be instatiated with this here, must be some kind of Dep Injection or something
     displayname = mapped_column(String(500))
     user_id: Mapped[int] = mapped_column(ForeignKey("User.id"), unique=True)
-    user: Mapped["User"] = relationship(back_populates="User")
+    # Many to one relation for Posts
+    posts: Mapped[List["Post"]] = relationship(uselist=True)
+    comment: Mapped[List["Comment"]] = relationship(uselist=True)
 
 
-# class AdminRoles(Base):
-#     pass
+class HasAdmin(Base):
+    __tablename__ = "HasAdmin"
+    # only one or zero allowed
+    is_admin: Mapped[int] = mapped_column(Boolean, nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("User.id"), unique=True)
 
 
 class Post(Base):
-    __tablename__ = "Posts"
+    __tablename__ = "Post"
 
     make: Mapped[str] = mapped_column(String(200), nullable=False)
     model: Mapped[str] = mapped_column(String(200), nullable=False)
     serial: Mapped[str] = mapped_column(String(60), nullable=False)
     description: Mapped[str] = mapped_column(String(600))
+    # UserProfile - Post relationship
+    user_profile_id: Mapped[int] = mapped_column(ForeignKey("UserProfile.id"))
+    # Imaage - Post relationship
+    images: Mapped[List["Image"]] = relationship(uselist=True)
+    comment: Mapped[List["Comment"]] = relationship(uselist=True)
 
 
-class Images(Base):
-    __tablename__ = "Images"
+class Image(Base):
+    __tablename__ = "Image"
 
     path: Mapped[str] = mapped_column(String(300), nullable=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey("Post.id"), unique=True)
 
 
-# class Comment(Base):
-#     pass
+class Comment(Base):
+    __tablename__ = "Comment"
+
+    user_profile_id: Mapped[int] = mapped_column(ForeignKey("UserProfile.id"))
+    comment_content: Mapped[int] = mapped_column(String(500), nullable=False)
+    post_id: Mapped[int] = mapped_column(ForeignKey("Post.id"))
+
+
+engine = create_engine(
+    "mariadb+pymysql://adrian-dev:hellodatabase@localhost/bikeindex2?charset=utf8mb4",
+    echo=True,
+)
+
+# Base.metadata.create_all(bind=engine)
+
+Session = sessionmaker(bind=engine)
+session = Session()
+
+user1 = User(username="adrian", hashed_password="password")
+
+session.add(user1)
+session.commit()
