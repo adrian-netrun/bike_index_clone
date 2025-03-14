@@ -1,17 +1,12 @@
 from dotenv import load_dotenv
 from typing import List
-from typing import Optional
-from datetime import datetime
 from sqlalchemy import ForeignKey
-from sqlalchemy import String, DateTime, Integer, Boolean
+from sqlalchemy import String, DateTime, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import UniqueConstraint
 
 load_dotenv("../../.env")
 
