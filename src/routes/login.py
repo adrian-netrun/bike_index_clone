@@ -1,6 +1,6 @@
 from flask import Blueprint, request, Response, json, make_response
 from sqlalchemy import select
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 from ...db import db_session
 from ..models.models import User
 
@@ -26,6 +26,13 @@ def fetch_users_password(request: dict[str]) -> tuple | Exception:
 def login() -> None:
     data: dict = request.json
     row = fetch_users_password(data)
-    print(row)
+    try:
+        check = check_password_hash(row[2], data["password"])
+        if not check:
+            raise Exception
+        # this is not the correct way of handling things
+    except Exception as error:
+        print(error)
+        return "password is wrong", 401
 
     return "login route hit", 200

@@ -1,4 +1,3 @@
-import os
 from flask import Flask
 from .src.routes.index import base
 from .src.routes.login import rc_login

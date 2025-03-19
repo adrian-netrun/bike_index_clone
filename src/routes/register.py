@@ -1,7 +1,5 @@
-import os
-from flask import Blueprint, request, json, make_response
+from flask import Blueprint, request
 from werkzeug.security import generate_password_hash
-from sqlalchemy.exc import IntegrityError
 from ..models.models import User
 from ...db import db_session
 
