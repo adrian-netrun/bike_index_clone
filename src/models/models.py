@@ -1,26 +1,8 @@
-from dotenv import load_dotenv
 from typing import List
-from sqlalchemy import ForeignKey
-from sqlalchemy import String, DateTime, Boolean
+from sqlalchemy import String, DateTime, Boolean, ForeignKey
 from sqlalchemy.sql import func
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import relationship
-
-load_dotenv("../../.env")
-
-
-class Base(DeclarativeBase):
-    id: Mapped[int] = mapped_column(
-        primary_key=True, autoincrement=True, nullable=False
-    )
-
-    created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at = mapped_column(DateTime(timezone=True), onupdate=func.utcnow())
-
-    def __repr__(self):
-        pass
+from sqlalchemy.orm import relationship, mapped_column, Mapped
+from ...db import Base
 
 
 class User(Base):

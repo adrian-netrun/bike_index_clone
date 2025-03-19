@@ -1,56 +1,29 @@
 import os
-from flask import Blueprint, request, Response, json
+from flask import Blueprint, request, json, make_response
 from werkzeug.security import generate_password_hash
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from ..error_handler import handle_DB_error
-from ..db.models import User
-
-db_engine = create_engine(
-    os.environ["DB_URI"],
-    echo=True,
-)
+from ..models.models import User
+from ...db import db_session
 
 rc_register = Blueprint("register", __name__, url_prefix="/api")
-
-
-def register_user(username, unhashed_password) -> None:
-    hashed_password = generate_password_hash(
-        unhashed_password, method="pbkdf2", salt_length=16
-    )
-    with Session(db_engine) as session:
-        try:
-            user = User(username=username, hashed_password=hashed_password)
-            session.add(user)
-            session.commit()
-            return True
-        except IntegrityError as err:
-            handle_DB_error(err)
-            return err
-        finally:
-            session.close()
-            return False
-
-
-def is_user_exist(username) -> bool:
-    pass
 
 
 @rc_register.route("/register", methods=["POST"])
 def register():
     data = request.json
+    print(data["password"])
+    hashed_password = generate_password_hash(
+        data["password"], method="pbkdf2", salt_length=16
+    )
 
-    user_exist = is_user_exist(data["username"])
-    if user_exist is True:
-        return Response(json.dumps({"User_exists": True}), status=409)
+    new_user = User(username=data["username"], hashed_password=hashed_password)
 
     try:
-        register = register_user(data["username"], data["password"])
-        if register is True:
-            return Response(json.dumps({"User_created": True}), status=200)
-        else:
-            raise Exception("Duplicate user or other Database type error")
+        with db_session() as session:
+            session.add(new_user)
+            session.commit()
+    except Exception as error:
+        print(error)
+        return "User already exists", 400
 
-    except Exception as err:
-        return handle_DB_error(err)
+    return "Completed correctly", 200

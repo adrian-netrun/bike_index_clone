@@ -1,8 +1,0 @@
-hello error 
-hello error
-Duplicate user or other Database type error
-(pymysql.err.IntegrityError) (1062, "Duplicate entry 'testuser@bikeindex.com' for key 'username'")
-[SQL: INSERT INTO `User` (username, hashed_password, updated_at) VALUES (%(username)s, %(hashed_password)s, %(updated_at)s) RETURNING `User`.id, `User`.created_at]
-[parameters: {'username': 'testuser@bikeindex.com', 'hashed_password': 'pbkdf2:sha256:1000000$fdN4enjFkwVdSTEp$db7c58dddcbe2451903f9b7a4e24965ff18df7b555b5f6d5d69ef9b48c668e63', 'updated_at': None}]
-(Background on this error at: https://sqlalche.me/e/20/gkpj)
-Duplicate user or other Database type error
