@@ -1,8 +1,11 @@
+import os
 from flask import Flask
 from .src.routes.index import base
 from .src.routes.login import rc_login
 from .src.routes.register import rc_register
+from .src.routes.logout import rc_logout
 from .db import db_session
+from .session import session_db, sess
 
 from dotenv import load_dotenv
 
@@ -23,11 +26,17 @@ def create_app(test_config=None) -> object:
     app.register_blueprint(base)
     app.register_blueprint(rc_register)
     app.register_blueprint(rc_login)
+    app.register_blueprint(rc_logout)
+
+    app.config["SESSION_TYPE"] = "filesystem"
+    app.config["SESSION_PERMANENT"] = False
+
+    # actual flask-session instance
+    sess.init_app(app)
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
         db_session.remove()
-        print("session closed")
 
     shutdown_session()
 
